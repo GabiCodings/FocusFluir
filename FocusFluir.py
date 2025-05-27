@@ -41,24 +41,7 @@ centro.place(relx=0.5, rely=0.5, anchor="center")
 #canvas.grid(0,0)
 #janela.bind("<Configure>", redesenhar_nuvens)
 
-label_email = tk.Label(centro, text="E-mail:", font=("Arial", 12))
-label_email.grid(row=1, column=0, sticky="e", padx=10, pady=10)
-
-
-entry_email = tk.Entry(centro, font=("Arial", 12), width=20)
-entry_email.grid(row=1, column=1, padx=10, pady=10)
-
-
-
-label_senha = tk.Label(centro, text="Senha:", font=("Arial", 12))
-label_senha.grid(row=2, column=0, sticky="e", padx=10, pady=10)
-
-
-entry_senha = tk.Entry(centro, show="*", font=("Arial", 12), width=20)
-entry_senha.grid(row=2, column=1, padx=10, pady=10)
-
-
-botao_login = tk.Button(centro, text="Entrar", font=("Arial", 12))
-botao_login.grid(row=2, column=0, columnspan=2, pady=20)
+botao_login = tk.Button(centro, text="Entrar", font=("Arial", 15), width=15, height=2)
+botao_login.grid(row=1, column=0, columnspan=2, pady=1)
 
 janela.mainloop()
