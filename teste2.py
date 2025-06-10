@@ -16,26 +16,44 @@ def abrir_tela_sessao():
     frame_inputs = tk.Frame(tela_sessao, bg="#f0f0f0")
     frame_inputs.pack()
 
-    tk.Label(frame_inputs, text="Tempo de Estudo (min):", font=("Arial", 14), bg="#f0f0f0").grid(row=0, column=0, padx=10, pady=10)
+    tk.Label(frame_inputs, text="Tempo de Estudo (min.seg):", font=("Arial", 14), bg="#f0f0f0").grid(row=0, column=0, padx=10, pady=10)
     entry_estudo = tk.Entry(frame_inputs, font=("Arial", 14))
     entry_estudo.grid(row=0, column=1, padx=10)
 
-    tk.Label(frame_inputs, text="Tempo de Pausa (min):", font=("Arial", 14), bg="#f0f0f0").grid(row=1, column=0, padx=10, pady=10)
+    tk.Label(frame_inputs, text="Tempo de Pausa (min.seg):", font=("Arial", 14), bg="#f0f0f0").grid(row=1, column=0, padx=10, pady=10)
     entry_pausa = tk.Entry(frame_inputs, font=("Arial", 14))
     entry_pausa.grid(row=1, column=1, padx=10)
 
     def validar_e_iniciar():
-        estudo = entry_estudo.get()
-        pausa = entry_pausa.get()
-        if not estudo.isdigit() or not pausa.isdigit():
-            messagebox.showerror("Erro", "Informe apenas números.")
+        estudo = entry_estudo.get().strip()
+        pausa = entry_pausa.get().strip()
+
+        try:
+            # Estudo
+            partes_estudo = estudo.split(".")
+            min_estudo = int(partes_estudo[0])
+            seg_estudo = int(partes_estudo[1]) if len(partes_estudo) > 1 else 0
+            estudo_total = min_estudo * 60 + seg_estudo
+
+            # Pausa
+            partes_pausa = pausa.split(".")
+            min_pausa = int(partes_pausa[0])
+            seg_pausa = int(partes_pausa[1]) if len(partes_pausa) > 1 else 0
+            pausa_total = min_pausa * 60 + seg_pausa
+
+            if estudo_total <= 0 or pausa_total <= 0:
+                raise ValueError
+
+        except:
+            messagebox.showerror("Erro", "Informe os tempos no formato minutos.segundos (ex: 2.30)")
             return
+
         tela_sessao.destroy()
-        iniciar_cronometro(int(estudo), int(pausa))
+        iniciar_cronometro(estudo_total, pausa_total)
 
     tk.Button(tela_sessao, text="Iniciar", font=("Arial", 13), width=15, command=validar_e_iniciar).pack(pady=20)
 
-def iniciar_cronometro(estudo_min, pausa_min):
+def iniciar_cronometro(estudo_seg, pausa_seg):
     frame_cronometro = tk.Frame(janela, bg="#f0f0f0")
     frame_cronometro.pack(expand=True)
 
@@ -48,9 +66,6 @@ def iniciar_cronometro(estudo_min, pausa_min):
     botao_terminar = tk.Button(frame_cronometro, text="Terminar Sessão", font=("Arial", 13), width=15,
                                 command=lambda: voltar_para_tela_inicial(frame_cronometro))
     botao_terminar.pack(pady=20)
-
-    estudo_seg = estudo_min * 60
-    pausa_seg = pausa_min * 60
 
     def loop_pomodoro():
         nonlocal estudo_seg, pausa_seg
@@ -70,13 +85,15 @@ def iniciar_cronometro(estudo_min, pausa_min):
             label_timer.config(text=f"{minutos:02}:{segundos:02}")
             pausa_seg -= 1
         else:
-            estudo_seg = estudo_min * 60
-            pausa_seg = pausa_min * 60
+            estudo_seg = estudo_seg_inicial
+            pausa_seg = pausa_seg_inicial
 
         frame_cronometro.after(1000, loop_pomodoro)
 
     global contando
     contando = True
+    estudo_seg_inicial = estudo_seg
+    pausa_seg_inicial = pausa_seg
     loop_pomodoro()
 
 def voltar_para_tela_inicial(frame_atual):
