@@ -49,8 +49,8 @@ def listar_playlists():
     return cursor.fetchall()
 
 def adicionar_musica(playlist_id:int, titulo:str, url:str):
-    cursor.execute("INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?,?,?)",
-                   (playlist_id, titulo, url))
+    cursor.execute("INSERT INTO musicas_playlist (titulo, url) VALUES (?,?)",
+                   (titulo, url))
     conn.commit()
 
 # Configurações 
