@@ -1,4 +1,4 @@
-# banco.py  – models + criação das tabelas
+
 import sqlite3
 from datetime import datetime
 
@@ -48,9 +48,9 @@ def listar_playlists():
     cursor.execute("SELECT id, nome FROM playlists")
     return cursor.fetchall()
 
-def adicionar_musica(playlist_id:int, titulo:str, url:str):
-    cursor.execute("INSERT INTO musicas_playlist (titulo, url) VALUES (?,?)",
-                   (titulo, url))
+def adicionar_musica(playlist_id: int,titulo:str, url:str):
+    cursor.execute("INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?,?,?)",
+                   (playlist_id, titulo, url))
     conn.commit()
 
 # Configurações 
