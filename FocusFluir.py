@@ -17,7 +17,7 @@ def abrir_tela_playlist():
     frame_inputs = tk.Frame(tela_playlist, bg="#f0f0f0")
     frame_inputs.pack()
 
-    tk.Label(frame_inputs, text="Nome da Playlist", font=("Arial", 14), bg="#f0f0f0").grid(row=0, column=0, padx=10, pady=10)
+    tk.Label(frame_inputs, text="Nome da Musica", font=("Arial", 14), bg="#f0f0f0").grid(row=0, column=0, padx=10, pady=10)
     entry_musica = tk.Entry(frame_inputs, font=("Arial", 14))
     entry_musica.grid(row=0, column=1, padx=10)
 
@@ -29,21 +29,22 @@ def abrir_tela_playlist():
     def banco_musica():
         titulo = entry_musica.get().strip()
         url = entry_url.get().strip()
-        playlist_id = 3
+        
 
         if not titulo or not url:
             messagebox.showwarning("Campos obrigatórios", "Preencha o título e a URL.")
             return
 
         
-        BancoFocusFluir.adicionar_musica(playlist_id, titulo, url)
+        BancoFocusFluir.adicionar_musica(titulo, url)
 
         BancoFocusFluir.fechar_conexao()
         tela_playlist.destroy()
         messagebox.showinfo("Sucesso", "Música adicionada com sucesso!")
+        voltar_para_tela_inicial(tela_playlist)
 
     tk.Button(tela_playlist, text="Criar", font=("Arial", 13), width=15, command=banco_musica).pack(pady=20)
-
+                
 
 def abrir_tela_sessao():
     centro.pack_forget()
@@ -94,6 +95,7 @@ def abrir_tela_sessao():
         iniciar_cronometro(estudo_total, pausa_total)
 
     tk.Button(tela_sessao, text="Iniciar", font=("Arial", 13), width=15, command=validar_e_iniciar).pack(pady=20)
+            
 
 def iniciar_cronometro(estudo_seg, pausa_seg):
     frame_cronometro = tk.Frame(janela, bg="#f0f0f0")

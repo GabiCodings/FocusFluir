@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS playlists (
 
 CREATE TABLE IF NOT EXISTS musicas_playlist (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    playlist_id INTEGER NOT NULL,
+    playlist_id INTEGER,
     titulo TEXT,
     url TEXT NOT NULL,
     FOREIGN KEY (playlist_id) REFERENCES playlists(id)
@@ -48,9 +48,9 @@ def listar_playlists():
     cursor.execute("SELECT id, nome FROM playlists")
     return cursor.fetchall()
 
-def adicionar_musica(playlist_id: int,titulo:str, url:str):
-    cursor.execute("INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?,?,?)",
-                   (playlist_id, titulo, url))
+def adicionar_musica(titulo:str, url:str):
+    cursor.execute("INSERT INTO musicas_playlist (titulo, url) VALUES (?,?)",
+                   (titulo, url))
     conn.commit()
 
 # Configurações 
