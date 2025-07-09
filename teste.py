@@ -24,7 +24,7 @@ def db_connection(tmp_path):
     yield conn
     conn.close()
 
-def test_criar_playlist(db_connection)
+def test_criar_playlist(db_connection):
     playlist_id = criar_playlist("Concentração", "imagem1.jpg")
     assert isinstance(playlist_id, int)
 
