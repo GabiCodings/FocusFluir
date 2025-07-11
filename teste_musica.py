@@ -3,13 +3,24 @@ import sqlite3
 
 
 from BancoFocusFluir import (
-    adicionar_musica,
-    criar_playlist
+    musicas_playlist,
+    adicionar_musica
     
 )
 
-def test_adicionar_musica():
-    id_playlist = criar_playlist("Playlist Música Teste", None)
-    adicionar_musica("Música", "youtube.com")
+@pytest.fixture
+def conexao():
+    conn = sqlite3.connect(':memory:')
+    musicas_playlist(conn)
+    yield conn
+    conn.close()
 
+def test_adicionar_musica(conexao):
+    adicionar_musica(conexao,"Música", "youtube.com")
+
+
+
+
+
+    assert  in id_playlist
 

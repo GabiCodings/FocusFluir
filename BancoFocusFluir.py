@@ -13,7 +13,10 @@ CREATE TABLE IF NOT EXISTS playlists (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     imagem TEXT
-);
+)
+""")                    
+
+cursor.executescript("""
 
 CREATE TABLE IF NOT EXISTS musicas_playlist (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +24,10 @@ CREATE TABLE IF NOT EXISTS musicas_playlist (
     titulo TEXT,
     url TEXT NOT NULL,
     FOREIGN KEY (playlist_id) REFERENCES playlists(id)
-);
+)
+""")
+
+cursor.executescript("""
 
 CREATE TABLE IF NOT EXISTS configuracoes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +36,7 @@ CREATE TABLE IF NOT EXISTS configuracoes (
     playlist_padrao_id INTEGER,
     usar_meditacao BOOLEAN DEFAULT 0,
     FOREIGN KEY (playlist_padrao_id) REFERENCES playlists(id)
-);
+)
 """)
 conn.commit()
 
