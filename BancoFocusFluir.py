@@ -1,44 +1,58 @@
+from flask import Flask, render_template, request, redirect, url_for
 
 import sqlite3
 from datetime import datetime
 
 
-conn = sqlite3.connect("focusfluir.db")
-cursor = conn.cursor()
+app = Flask(__name__)
 
 
-cursor.executescript("""
+DATABASE = "focusfluir.db"
 
-CREATE TABLE IF NOT EXISTS playlists (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    imagem TEXT
-)
-""")                    
+def conexao():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-cursor.executescript("""
 
-CREATE TABLE IF NOT EXISTS musicas_playlist (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    playlist_id INTEGER,
-    titulo TEXT,
-    url TEXT NOT NULL,
-    FOREIGN KEY (playlist_id) REFERENCES playlists(id)
-)
-""")
+def setup_database():
+    conn = conexao()
+    cursor = conn.cursor()
 
-cursor.executescript("""
 
-CREATE TABLE IF NOT EXISTS configuracoes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    duracao_padrao_estudo INTEGER DEFAULT 1500,  -- 25 min
-    duracao_padrao_pausa  INTEGER DEFAULT 300,   -- 5 min
-    playlist_padrao_id INTEGER,
-    usar_meditacao BOOLEAN DEFAULT 0,
-    FOREIGN KEY (playlist_padrao_id) REFERENCES playlists(id)
-)
-""")
-conn.commit()
+    cursor.executescript("""
+
+    CREATE TABLE IF NOT EXISTS playlists (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        imagem TEXT
+    )
+    """)                    
+
+    cursor.executescript("""
+
+    CREATE TABLE IF NOT EXISTS musicas_playlist (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        playlist_id INTEGER,
+        titulo TEXT,
+        url TEXT NOT NULL,
+        FOREIGN KEY (playlist_id) REFERENCES playlists(id)
+    )
+    """)
+
+    cursor.executescript("""
+
+    CREATE TABLE IF NOT EXISTS configuracoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        duracao_padrao_estudo INTEGER DEFAULT 1500,  -- 25 min
+        duracao_padrao_pausa  INTEGER DEFAULT 300,   -- 5 min
+        playlist_padrao_id INTEGER,
+        usar_meditacao BOOLEAN DEFAULT 0,
+        FOREIGN KEY (playlist_padrao_id) REFERENCES playlists(id)
+    )
+    """)
+    conn.commit()
+    conn.close()
 
 
 # MODELS
@@ -46,35 +60,69 @@ conn.commit()
 
 # Playlists 
 def criar_playlist(nome:str, imagem:str|None=None)->int:
+    conn = conexao()
+    cursor = conn.cursor()
     cursor.execute("INSERT INTO playlists (nome, imagem) VALUES (?,?)", (nome, imagem))
     conn.commit()
-    return cursor.lastrowid
+    playlist_id = cursor.lastrowid
+    conn.close()
+    return playlist_id
 
 def listar_playlists():
+    conn = conexao()
+    cursor = conn.cursor()
     cursor.execute("SELECT id, nome FROM playlists")
-    return cursor.fetchall()
-
-def adicionar_musica(titulo:str, url:str):
-    cursor.execute("INSERT INTO musicas_playlist (titulo, url) VALUES (?,?)",
-                   (titulo, url))
-    conn.commit()
-
-# Configurações 
-def set_configuracoes(estudo:int, pausa:int, playlist_id:int|None=None, meditacao:bool=False):
-    cursor.execute("DELETE FROM configuracoes")
-    cursor.execute(
-        "INSERT INTO configuracoes (duracao_padrao_estudo, duracao_padrao_pausa, playlist_padrao_id, usar_meditacao) VALUES (?,?,?,?)",
-        (estudo, pausa, playlist_id, int(meditacao))
-    )
-    conn.commit()
-
-def get_configuracoes():
-    cursor.execute("SELECT duracao_padrao_estudo, duracao_padrao_pausa, playlist_padrao_id, usar_meditacao FROM configuracoes LIMIT 1")
-    return cursor.fetchone()
-
-
-def fechar_conexao():
+    playlist = cursor.fetchall()
     conn.close()
+    return playlist
+
+def adicionar_musica(playlist_id:int, titulo:str, url:str):
+    conn = conexao()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?,?,?)",
+                   (playlist_id, titulo, url))
+    conn.commit()
+    conn.close()
+
+
+@app.route('/')
+def index():
+    return render_template('home.html')
+
+
+@app.get("/playlists", methods=['GET', 'POST'])
+def get_playlists():
+    if request.method == 'POST':
+        nome_playlist = request.form[nome_playlist]
+        imagem_url = request.form.get('imagem_url', '')
+        links_musica_str = request.form['links_musica']
+
+        playlist_id = criar_playlist(nome_playlist, imagem_url)
+
+        links = [link.strip() for link in links_musica_str.split('\n') if link.strip()]
+
+        for link in links:
+            adicionar_musica(
+                playlist_id = playlist_id,
+                titulo=link,
+                url=link
+            )
+        
+        return redirect(url_for('playlists_page'))
+
+    playlists = listar_playlists()
+    return render_template('playlist.html', playlists=playlists)
+
+if __name__ == '__main__':
+    setup_database()
+    app.run(debug=True)
+
+
+
+
+
+
+
 
 
 

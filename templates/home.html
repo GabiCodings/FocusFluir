@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFluir</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+
+
+    <style>
+        body {
+            background-color: #E4C5EB;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .pixel-font {
+            font-family: 'Jersey 10', sans-serif;;
+            font-size: 135px;
+            color: #FFFBFB;
+            text-shadow: 5px 2px 0 #00000033; ;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .custom-btn {
+            background-color: #a0c4ff;
+            border-color: #a0c4ff;
+            color: #FFFBFB;
+            padding: 5px 30px;
+            border-radius: 10px;
+            font-size: 1.25rem;
+            width: 300px;
+            margin: 10px 0;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .custom-btn:hover {
+            background-color: #b8d0ff;
+            border-color: #b8d0ff;
+            color: #FFFBFB;
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex flex-column align-items-center">
+        <h1 class="pixel-font">FocusFluir</h1>
+
+        <a href="sessao.html" class="btn custom-btn" role="button">
+            Iniciar Sessão
+        </a>
+        <a href="{{ url_for(playlist_page)  }}" class="btn custom-btn" role="button">
+            Criar Playlists
+        </a>
+    </div>
+
+</body>
+</html>
