@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Criar Playlists - FocusFluir</title>
+    <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
@@ -97,11 +98,11 @@
         </a>
 
         <div class="playlist-list">
-            <h2 class="pixel-font" style="font-size: 30px; margin-top: 30px;">Playlists Existentes:</h2>
+            <h2 class="pixel-font" style="font-size: 30px; margin-top: 30px; color:rgb(240, 240, 240)">Playlists Existentes:</h2>
             {% if playlists %}
                 <ul>
                 {% for playlist in playlists %}
-                    <li style="list-style-type: none; margin-bottom: 5px;">{{ playlist.nome }} (ID: {{ playlist.id }})</li>
+                    <li style="list-style-type: none; margin-bottom: 5px; color:#2e69c9;">{{ playlist.nome }} (ID: {{ playlist.id }})</li>
                 {% endfor %}
                 </ul>
             {% else %}
