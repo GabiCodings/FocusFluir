@@ -6,8 +6,8 @@
     <title>FocusFluir</title>
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
 
 
     <style>
@@ -54,7 +54,7 @@
     <div class="container d-flex flex-column align-items-center">
         <h1 class="pixel-font">FocusFluir</h1>
 
-        <a href="sessao.html" class="btn custom-btn" role="button">
+        <a href="{{ url_for('sessao') }}" class="btn custom-btn" role="button">
             Iniciar Sessão
         </a>
         <a href="{{ url_for('playlists_page') }}" class="btn custom-btn" role="button">

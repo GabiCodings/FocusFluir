@@ -1,11 +1,188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>FocusFluir</title>
+    
+    <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+
+    <style>
+        body 
+        { 
+            background-color: #E4C5EB; 
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+        }
+
+        .pixel-font 
+        { 
+            font-family: 'Jersey 10', sans-serif; 
+            font-size: 80px; color: #FFFBFB; 
+            text-shadow: 5px 2px 0 #00000033; 
+            margin-bottom: 2rem; text-align: center; 
+        }
+
+        .card-azul 
+        { 
+            background-color: #c4d9ff; 
+            border: none; border-radius: 15px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            color: #1a1a1a; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+         }
+
+        .card-rosa 
+        { 
+            background-color: #f7a8b8; 
+            color: #1a1a1a;
+            font-weight: bold; 
+            padding: 10px; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            text-align: center; 
+        }
+
+        .playlist-bloco
+        { 
+            background-color: #C379B4; 
+            border-radius: 15px; 
+            padding: 10px; 
+            margin-bottom: 20px; 
+            height: 350px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
+            overflow-y: auto; 
+        }
+
+        .playlist-titulo
+         { 
+            background-color: #f7a8b8; 
+            color: #1a1a1a; 
+            padding: 10px; 
+            border-radius: 10px; 
+            text-align: center;
+             margin-bottom: 10px; 
+             font-weight: bold; 
+            }
+
+        .btn-direita 
+        { 
+            text-align: right;
+        }
+
+        .btn-esquerda 
+        { 
+            text-align: left;
+        }
+
+        .btn-config
+        { 
+            font-size: 40px; 
+            color: #C379B4;
+            text-shadow: 2px 2px 0 #ffffff;
+            text-decoration: none; 
+            z-index: 1000;
+            cursor: pointer;
+            font-family: 'Jersey 10', sans-serif;
+            padding: -60px;
+            background: none;
+            border: none;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .form-temp
+        { 
+            border-radius: 8px;
+            border: 1px solid #a0c4ff; 
+            background-color: #FFFBFB; 
+            padding: 8px; 
+        }
+
+        .input
+        { 
+            background-color: #c4d9ff; 
+            border: none; 
+            border-radius: 15px; 
+            padding: 10px; 
+            margin-bottom: 20px; 
+            text-align: center; 
+        }
+
+    </style>
 </head>
 <body>
-    asda
+    
+    <div class="container my-4">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <h1 class="pixel-font">Vamos Lá!!</h1>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('iniciar_foco') }}" id="sessaoForm" class="row">
+            
+            <div class="col-md-6">
+                
+                <div class="input">
+                    <h3 class="custom-card-pink" style="color: #FFFBFB;">Tempo (Minutos)</h3>
+                    <input type="number" class="form-control form-temp" name="duracao_estudo" 
+                           value="{{ duracao_estudo }}" placeholder="Ex: 25" required>
+                </div>
+                
+                <div class="input">
+                    <h3 class="card-rosa" style="color: #FFFBFB;">Pausas (Minutos)</h3>
+                    <input type="number" class="form-control form-temp mb-4" name="duracao_pausa" 
+                           value="{{ duracao_pausa }}" placeholder="Ex: 5" required>
+                </div>
+
+                <div class="card-azul">
+                    <h3 class="text-center mb-3" style="color:#C379B4;">Objetivos</h3>
+                    
+                    <div style="max-height: 150px; overflow-y: auto;">
+                        <p class="text-muted text-center">Sem Objetivos.</p>
+                    </div>
+                </div>
+            </div> <div class="col-md-6">
+                <div class="playlist-bloco">
+                    <div class="playlist-titulo" style="color: #FFFBFB;">Qual Playlist Hoje?</div>
+                    
+                    <div class="list-group">
+                        {% for playlist in playlists %}
+                            <label class="list-group-item" style="cursor: pointer; background-color: #e6a8d8; border-color: #e6a8d8; margin-bottom: 5px;">
+                                <input class="form-check-input me-1" type="radio" name="playlist_selecionada" value="{{ playlist.id }}" required>
+                                {{ playlist.nome }}
+                            </label>
+                        {% else %}
+                            <p class="text-muted text-center" style="color: #FFFBFB;">Nenhuma playlist criada.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div> </form>
+    </div>
+
+    <div class="container mt-5 mb-3">
+        <div class="d-flex justify-content-between">
+
+            <a href="{{ url_for('index') }}" class="btn-config btn-esquerda"> Voltar </a>
+
+            <a href="{{ url_for('index') }}" class="btn-config btn-direita"> Pronto </a>
+    
+
+        </div>
+    </div>
+
+   
+    
+    
+    
 </body>
 </html>

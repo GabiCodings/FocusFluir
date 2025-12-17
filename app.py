@@ -18,7 +18,7 @@ def conexao():
 def setup_database():
     conn = conexao()
     cursor = conn.cursor()
-
+    
 
     cursor.executescript("""
 
@@ -41,24 +41,26 @@ def setup_database():
     """)
 
     cursor.executescript("""
-
-    CREATE TABLE IF NOT EXISTS configuracoes (
+                         
+    CREATE TABLE IF NOT EXISTS sessoes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        duracao_padrao_estudo INTEGER DEFAULT 1500,  -- 25 min
-        duracao_padrao_pausa  INTEGER DEFAULT 300,   -- 5 min
-        playlist_padrao_id INTEGER,
-        usar_meditacao BOOLEAN DEFAULT 0,
-        FOREIGN KEY (playlist_padrao_id) REFERENCES playlists(id)
+        data_inicio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        duracao_programada_estudo INTEGER NOT NULL,
+        duracao_programada_pausa INTEGER NOT NULL,
+        playlist_id INTEGER,
+        FOREIGN KEY (playlist_id) REFERENCES playlists(id)
     )
     """)
+
+
     conn.commit()
     conn.close()
 
 
-# MODELS
 
 
-# Playlists 
+# MODEL
+#PLAYLIST
 def criar_playlist(nome:str, imagem:str|None=None)->int:
     conn = conexao()
     cursor = conn.cursor()
@@ -85,6 +87,26 @@ def adicionar_musica(playlist_id:int, titulo:str, url:str):
     conn.close()
 
 
+
+#SESSAO
+
+def iniciar_nova_sessao(tempo_estudo: int, tempo_pausa: int, playlist_id: int | None, objetivo_id: int | None) -> int:
+    conn = conexao()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO sessoes (duracao_programada_estudo, duracao_programada_pausa, playlist_id, objetivo_id) VALUES (?, ?, ?, ?)",
+        (tempo_estudo, tempo_pausa, playlist_id, objetivo_id)
+    )
+    conn.commit()
+    sessao_id = cursor.lastrowid
+    conn.close()
+    return sessao_id
+
+
+
+
+
+#FLASK
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -117,9 +139,47 @@ def playlists_page():
     playlists = listar_playlists()
     return render_template('playlists.html', playlists=playlists)
 
-@app.route('/sessao')
+@app.route('/sessao', methods=['GET'])
 def sessao():
-    return render_template('sessao.html')
+    playlists = listar_playlists()
+    
+    return render_template('sessao.html', 
+        duracao_estudo="",
+        duracao_pausa="",
+        playlists=playlists,
+        )
+
+
+@app.route('/iniciar_foco', methods=['POST'])
+def iniciar_foco():
+    
+    try:
+        tempo_estudo_min = int(request.form.get('duracao_estudo', 25))
+    except ValueError:
+        tempo_estudo_min = 25
+        
+    try:
+        tempo_pausa_min = int(request.form.get('duracao_pausa', 5))
+    except ValueError:
+        tempo_pausa_min = 5
+
+    
+    tempo_estudo_seg = tempo_estudo_min * 60
+    tempo_pausa_seg = tempo_pausa_min * 60
+    
+    
+    playlist_selecionada_id = request.form.get('playlist_selecionada')
+    
+    
+    sessao_id = iniciar_nova_sessao(
+        tempo_estudo=tempo_estudo_seg,
+        tempo_pausa=tempo_pausa_seg,
+        playlist_id=playlist_selecionada_id,
+    )
+    
+    
+    return redirect(url_for('timer', sessao_id=sessao_id))
+
 
 if __name__ == '__main__':
     setup_database()
