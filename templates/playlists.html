@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Criar Playlists - FocusFluir</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+    <style>
+        
+        body { 
+            background-color: #E4C5EB; 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            flex-direction: column; 
+            margin: 0; 
+            padding: 20px; }
+
+        .pixel-font {
+             font-family: 'Jersey 10', sans-serif;; 
+             font-size: 50px; 
+             color: #FFFBFB; 
+             text-shadow: 5px 2px 0 #00000033; 
+             margin-bottom: 1.5rem; 
+             text-align: center; 
+            }
+
+        .custom-btn { 
+            background-color: #a0c4ff; 
+            border-color: #a0c4ff;
+            color: #FFFBFB;
+            padding: 5px 30px; border-radius: 10px; 
+            font-size: 1.25rem; 
+            width: 300px; 
+            margin: 10px 0; 
+            transition: background-color 0.3s, border-color 0.3s; 
+        }
+
+        .custom-btn:hover { 
+            background-color: #b8d0ff; 
+            border-color: #b8d0ff; 
+            color: #FFFBFB; 
+        }
+        .form-group { 
+            margin-bottom: 15px; 
+            width: 100%; 
+            max-width: 400px; 
+        }
+
+        .form-group label { 
+            display: block; 
+            margin-bottom: 5px; 
+            color: #333; 
+            font-weight: bold; 
+        }
+        
+        .form-control { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+        }
+
+        .playlist-list { 
+            margin-top: 30px; 
+            color: #FFFBFB; }
+    </style>
+</head>
+<body>
+    <div class="container d-flex flex-column align-items-center">
+        <h1 class="pixel-font">Criar Nova Playlist</h1>
+
+        <form method="POST" action="{{ url_for('playlists_page') }}">
+            <div class="form-group">
+                <label for="nome_playlist">Nome da Playlist (Obrigatório):</label>
+                <input type="text" class="form-control" id="nome_playlist" name="nome_playlist" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="imagem_url">URL da Imagem (Opcional):</label>
+                <input type="url" class="form-control" id="imagem_url" name="imagem_url">
+            </div>
+            
+            <div class="form-group">
+                <label for="links_musica">Links das Músicas (Um por linha):</label>
+                <textarea class="form-control" id="links_musica" name="links_musica" rows="5" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn custom-btn">Salvar Playlist</button>
+        </form>
+        
+        <a href="{{ url_for('index') }}" class="btn custom-btn" style="margin-top: 20px; background-color: #6c757d; border-color: #6c757d;">
+            Voltar para o Início
+        </a>
+
+        <div class="playlist-list">
+            <h2 class="pixel-font" style="font-size: 30px; margin-top: 30px;">Playlists Existentes:</h2>
+            {% if playlists %}
+                <ul>
+                {% for playlist in playlists %}
+                    <li style="list-style-type: none; margin-bottom: 5px;">{{ playlist.nome }} (ID: {{ playlist.id }})</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>Nenhuma playlist encontrada.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

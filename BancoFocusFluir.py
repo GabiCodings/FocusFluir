@@ -87,31 +87,39 @@ def adicionar_musica(playlist_id:int, titulo:str, url:str):
 
 @app.route('/')
 def index():
-    return render_template('home.html')
+    return render_template('index.html')
 
-
-@app.get("/playlists", methods=['GET', 'POST'])
-def get_playlists():
+@app.route('/playlists', methods=['GET', 'POST'])
+def playlists_page():
+    
     if request.method == 'POST':
-        nome_playlist = request.form[nome_playlist]
+        nome_playlist = request.form['nome_playlist']
         imagem_url = request.form.get('imagem_url', '')
         links_musica_str = request.form['links_musica']
-
+        
+        
         playlist_id = criar_playlist(nome_playlist, imagem_url)
-
+        
+        
         links = [link.strip() for link in links_musica_str.split('\n') if link.strip()]
-
+        
         for link in links:
             adicionar_musica(
-                playlist_id = playlist_id,
-                titulo=link,
+                playlist_id=playlist_id, 
+                titulo=link, 
                 url=link
             )
+            
         
         return redirect(url_for('playlists_page'))
 
+    
     playlists = listar_playlists()
-    return render_template('playlist.html', playlists=playlists)
+    return render_template('playlists.html', playlists=playlists)
+
+@app.route('/sessao')
+def sessao():
+    return render_template('sessao.html')
 
 if __name__ == '__main__':
     setup_database()
