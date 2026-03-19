@@ -90,12 +90,12 @@ def adicionar_musica(playlist_id:int, titulo:str, url:str):
 
 #SESSAO
 
-def iniciar_nova_sessao(tempo_estudo: int, tempo_pausa: int, playlist_id: int | None, objetivo_id: int | None) -> int:
+def iniciar_nova_sessao(tempo_estudo: int, tempo_pausa: int, playlist_id: int) -> int:
     conn = conexao()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO sessoes (duracao_programada_estudo, duracao_programada_pausa, playlist_id, objetivo_id) VALUES (?, ?, ?, ?)",
-        (tempo_estudo, tempo_pausa, playlist_id, objetivo_id)
+        "INSERT INTO sessoes (duracao_programada_estudo, duracao_programada_pausa, playlist_id) VALUES (?, ?, ?)",
+        (tempo_estudo, tempo_pausa, playlist_id)
     )
     conn.commit()
     sessao_id = cursor.lastrowid
@@ -110,6 +110,13 @@ def iniciar_nova_sessao(tempo_estudo: int, tempo_pausa: int, playlist_id: int | 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/estudo')
+def estudo():
+    
+    min_foco = request.args.get('min_foco', 25)
+    min_pausa = request.args.get('min_pausa', 5)
+    return render_template('estudo.html', min_foco=min_foco, min_pausa=min_pausa)
 
 @app.route('/playlists', methods=['GET', 'POST'])
 def playlists_page():
@@ -152,7 +159,6 @@ def sessao():
 
 @app.route('/iniciar_foco', methods=['POST'])
 def iniciar_foco():
-    
     try:
         tempo_estudo_min = int(request.form.get('duracao_estudo', 25))
     except ValueError:
@@ -163,14 +169,10 @@ def iniciar_foco():
     except ValueError:
         tempo_pausa_min = 5
 
-    
     tempo_estudo_seg = tempo_estudo_min * 60
     tempo_pausa_seg = tempo_pausa_min * 60
     
-    
-    playlist_selecionada_id = request.form.get('playlist_selecionada')
-    
-    
+    playlist_selecionada_id = request.form.get('playlist_id') 
     sessao_id = iniciar_nova_sessao(
         tempo_estudo=tempo_estudo_seg,
         tempo_pausa=tempo_pausa_seg,
@@ -178,14 +180,12 @@ def iniciar_foco():
     )
     
     
-    return redirect(url_for('timer', sessao_id=sessao_id))
+    return redirect(url_for('estudo', min_foco=tempo_estudo_min, min_pausa=tempo_pausa_min))
 
 
 if __name__ == '__main__':
     setup_database()
     app.run(debug=True)
-
-
 
 
 

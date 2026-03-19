@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>FocusFluir - Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #E4C5EB;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            font-family: 'Jersey 10', sans-serif;
+            overflow: hidden;
+        }
+
+        .status-msg {
+            font-size: 90px;
+            color: #FFFBFB;
+            text-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        #timer {
+            font-size: 180px;
+            color: #61A5FF; 
+            text-shadow: 5px 5px 0px rgba(0,0,0,0.1);
+            margin-bottom: 50px;
+            letter-spacing: 5px;
+        }
+
+        .btn-terminar {
+            background-color: #B23B3B;
+            color: white;
+            border: none;
+            padding: 12px 50px;
+            border-radius: 40px;
+            font-size: 35px;
+            font-family: 'Jersey 10', sans-serif;
+            text-decoration: none;
+            box-shadow: 0 4px 0 #802a2a;
+            transition: all 0.1s;
+        }
+
+        .btn-terminar:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="status-msg" id="status-display">Você Consegue!!</div>
+    
+    <div id="timer">00:00</div>
+
+    <a href="{{ url_for('index') }}" class="btn-terminar">Terminar Sessão</a>
+
+    <script>
+        
+        let tempoFoco = {{ min_foco }} * 60;
+        let tempoPausa = {{ min_pausa }} * 60;
+        
+        let segundosRestantes = tempoFoco;
+        let modoFoco = true;
+
+        const timerElement = document.getElementById('timer');
+        const statusElement = document.getElementById('status-display');
+
+        function atualizarDisplay() {
+            let m = Math.floor(segundosRestantes / 60);
+            let s = segundosRestantes % 60;
+            timerElement.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function cronometro() {
+            if (segundosRestantes > 0) {
+                segundosRestantes--;
+                atualizarDisplay();
+            } else {
+                
+                modoFoco = !modoFoco;
+                segundosRestantes = modoFoco ? tempoFoco : tempoPausa;
+                
+                statusElement.textContent = modoFoco ? "Você Consegue!!" : "Hora de Relaxar!";
+                statusElement.style.color = modoFoco ? "#FFFBFB" : "#FFD1DC";
+                
+                
+                alert(modoFoco ? "De volta ao trabalho!" : "Hora do descanso!");
+            }
+        }
+
+        atualizarDisplay();
+        setInterval(cronometro, 1000);
+    </script>
+</body>
+</html>
