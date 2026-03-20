@@ -42,12 +42,6 @@
             font-family: 'Jersey 10', sans-serif;
             text-decoration: none;
             box-shadow: 0 4px 0 #802a2a;
-            transition: all 0.1s;
-        }
-
-        .btn-terminar:active {
-            transform: translateY(4px);
-            box-shadow: none;
         }
     </style>
 </head>
@@ -57,10 +51,14 @@
     
     <div id="timer">00:00</div>
 
+    <!-- PLAYER -->
+    <div style="width:300px; margin-bottom:20px;">
+        <div id="player"></div>
+    </div>
+
     <a href="{{ url_for('index') }}" class="btn-terminar">Terminar Sessão</a>
 
     <script>
-        
         let tempoFoco = {{ min_foco }} * 60;
         let tempoPausa = {{ min_pausa }} * 60;
         
@@ -81,20 +79,60 @@
                 segundosRestantes--;
                 atualizarDisplay();
             } else {
-                
                 modoFoco = !modoFoco;
                 segundosRestantes = modoFoco ? tempoFoco : tempoPausa;
                 
                 statusElement.textContent = modoFoco ? "Você Consegue!!" : "Hora de Relaxar!";
-                statusElement.style.color = modoFoco ? "#FFFBFB" : "#FFD1DC";
-                
-                
                 alert(modoFoco ? "De volta ao trabalho!" : "Hora do descanso!");
             }
         }
 
         atualizarDisplay();
         setInterval(cronometro, 1000);
+
+        
+
+        const musicas = {{ musicas | tojson }};
+
+        function extrairVideoId(url) {
+            const regExp = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/;
+            const match = url.match(regExp);
+            return match ? match[1] : null;
+        }
+
+        const playlist = musicas
+            .map(m => extrairVideoId(m.url))
+            .filter(id => id !== null);
+
+        let player;
+        let index = 0;
+
+        function onYouTubeIframeAPIReady() {
+            if (playlist.length === 0) return;
+
+            player = new YT.Player('player', {
+                height: '180',
+                width: '300',
+                videoId: playlist[0],
+                playerVars: { autoplay: 1 },
+                events: {
+                    'onReady': (event) => event.target.playVideo(),
+                    'onStateChange': function(event) {
+                        if (event.data === YT.PlayerState.ENDED) {
+                            index++;
+                            if (index < playlist.length) {
+                                player.loadVideoById(playlist[index]);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.body.appendChild(tag);
     </script>
+
 </body>
 </html>

@@ -1,11 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
-
 import sqlite3
 from datetime import datetime
 
-
 app = Flask(__name__)
-
 
 DATABASE = "focusfluir.db"
 
@@ -14,23 +11,19 @@ def conexao():
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def setup_database():
     conn = conexao()
     cursor = conn.cursor()
-    
 
     cursor.executescript("""
-
     CREATE TABLE IF NOT EXISTS playlists (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL,
         imagem TEXT
     )
-    """)                    
+    """)
 
     cursor.executescript("""
-
     CREATE TABLE IF NOT EXISTS musicas_playlist (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         playlist_id INTEGER,
@@ -41,7 +34,6 @@ def setup_database():
     """)
 
     cursor.executescript("""
-                         
     CREATE TABLE IF NOT EXISTS sessoes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         data_inicio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -52,15 +44,11 @@ def setup_database():
     )
     """)
 
-
     conn.commit()
     conn.close()
 
 
 
-
-# MODEL
-#PLAYLIST
 def criar_playlist(nome:str, imagem:str|None=None)->int:
     conn = conexao()
     cursor = conn.cursor()
@@ -81,14 +69,35 @@ def listar_playlists():
 def adicionar_musica(playlist_id:int, titulo:str, url:str):
     conn = conexao()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?,?,?)",
-                   (playlist_id, titulo, url))
+    cursor.execute(
+        "INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?,?,?)",
+        (playlist_id, titulo, url)
+    )
     conn.commit()
     conn.close()
 
 
+def buscar_musicas_da_playlist(playlist_id: int):
+    conn = conexao()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT titulo, url 
+        FROM musicas_playlist 
+        WHERE playlist_id = ?
+    """, (playlist_id,))
+    
+    rows = cursor.fetchall()
 
-#SESSAO
+    
+    musicas = [
+        {"titulo": row["titulo"], "url": row["url"]}
+        for row in rows
+    ]
+
+    conn.close()
+    return musicas
+
+
 
 def iniciar_nova_sessao(tempo_estudo: int, tempo_pausa: int, playlist_id: int) -> int:
     conn = conexao()
@@ -104,45 +113,47 @@ def iniciar_nova_sessao(tempo_estudo: int, tempo_pausa: int, playlist_id: int) -
 
 
 
-
-
-#FLASK
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/estudo')
 def estudo():
-    
     min_foco = request.args.get('min_foco', 25)
     min_pausa = request.args.get('min_pausa', 5)
-    return render_template('estudo.html', min_foco=min_foco, min_pausa=min_pausa)
+    playlist_id = request.args.get('playlist_id')
+
+    musicas = []
+    if playlist_id:
+        musicas = buscar_musicas_da_playlist(playlist_id)
+
+    return render_template(
+        'estudo.html',
+        min_foco=min_foco,
+        min_pausa=min_pausa,
+        musicas=musicas
+    )
 
 @app.route('/playlists', methods=['GET', 'POST'])
 def playlists_page():
-    
     if request.method == 'POST':
         nome_playlist = request.form['nome_playlist']
         imagem_url = request.form.get('imagem_url', '')
         links_musica_str = request.form['links_musica']
-        
-        
+
         playlist_id = criar_playlist(nome_playlist, imagem_url)
-        
-        
+
         links = [link.strip() for link in links_musica_str.split('\n') if link.strip()]
-        
+
         for link in links:
             adicionar_musica(
-                playlist_id=playlist_id, 
-                titulo=link, 
+                playlist_id=playlist_id,
+                titulo=link,
                 url=link
             )
-            
-        
+
         return redirect(url_for('playlists_page'))
 
-    
     playlists = listar_playlists()
     return render_template('playlists.html', playlists=playlists)
 
@@ -154,8 +165,7 @@ def sessao():
         duracao_estudo="",
         duracao_pausa="",
         playlists=playlists,
-        )
-
+    )
 
 @app.route('/iniciar_foco', methods=['POST'])
 def iniciar_foco():
@@ -173,24 +183,20 @@ def iniciar_foco():
     tempo_pausa_seg = tempo_pausa_min * 60
     
     playlist_selecionada_id = request.form.get('playlist_id') 
-    sessao_id = iniciar_nova_sessao(
+    
+    iniciar_nova_sessao(
         tempo_estudo=tempo_estudo_seg,
         tempo_pausa=tempo_pausa_seg,
         playlist_id=playlist_selecionada_id,
     )
     
-    
-    return redirect(url_for('estudo', min_foco=tempo_estudo_min, min_pausa=tempo_pausa_min))
-
+    return redirect(url_for(
+        'estudo',
+        min_foco=tempo_estudo_min,
+        min_pausa=tempo_pausa_min,
+        playlist_id=playlist_selecionada_id
+    ))
 
 if __name__ == '__main__':
     setup_database()
     app.run(debug=True)
-
-
-
-
-
-
-
-
