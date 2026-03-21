@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FocusFluir</title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+
     <style>
         body { 
             background-color: #E4C5EB; 
@@ -27,11 +29,11 @@
             background-color: #f7a8b8; 
             color: #FFFBFB; 
             padding: 10px;
-             border-radius: 10px; 
-             text-align: center; 
-             font-weight: bold; 
-             margin-bottom: 10px; 
-            }
+            border-radius: 10px; 
+            text-align: center; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+        }
         .input-block { 
             background-color: #c4d9ff; 
             border-radius: 15px; 
@@ -42,7 +44,8 @@
         .playlist-bloco { 
             background-color: #C379B4; 
             border-radius: 15px; 
-            padding: 15px; height: 300px; 
+            padding: 15px; 
+            height: 300px; 
             overflow-y: auto; 
             color: white; 
         }
@@ -56,28 +59,70 @@
             border: none; 
             cursor: pointer; 
         }
-        .btn-ready { color: #FFFBFB;
+        .btn-ready { 
+            color: #FFFBFB;
             text-shadow: 2px 2px 0px rgba(0,0,0,0.2); 
-            
         }
+
+        /* NOVO - apenas ajuste leve para lista */
+        .objetivo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .btn-remover {
+            background: none;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
     </style>
 </head>
+
 <body>
     <h1 class="pixel-font">Vamos Lá!!</h1>
     
     <form action="{{ url_for('iniciar_foco') }}" method="POST" class="container">
         <div class="row">
+
+            <!-- ESQUERDA -->
             <div class="col-md-6">
+
                 <div class="input-block">
                     <div class="card-rosa">Tempo (Minutos)</div>
                     <input type="number" name="duracao_estudo" class="form-control" value="25" required>
                 </div>
+
                 <div class="input-block">
                     <div class="card-rosa">Pausas (Minutos)</div>
                     <input type="number" name="duracao_pausa" class="form-control" value="5" required>
                 </div>
+
+                <!-- OBJETIVOS -->
+                <div class="input-block">
+                    <div class="card-rosa">Objetivos</div>
+
+                    <div id="lista-objetivos"></div>
+
+                    <div class="d-flex mt-2">
+                        <input type="text" id="novo-objetivo" class="form-control" placeholder="Digite um objetivo">
+                        <button type="button" class="btn btn-light ms-2" onclick="addObjetivo()">+</button>
+                    </div>
+
+                    <input type="hidden" name="objetivos" id="input-objetivos">
+                </div>
+
             </div>
-            
+
+            <!-- DIREITA -->
             <div class="col-md-6">
                 <div class="playlist-bloco">
                     <h4 class="text-center">Qual Playlist Hoje?</h4>
@@ -90,6 +135,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
         <div class="d-flex justify-content-between mt-5">
@@ -97,5 +143,72 @@
             <button type="submit" class="btn-config btn-ready">Pronto</button>
         </div>
     </form>
+
+    <script>
+        let objetivos = [];
+
+        function addObjetivo() {
+            const input = document.getElementById("novo-objetivo");
+            const texto = input.value.trim();
+
+            if (!texto) return;
+
+            objetivos.push(texto);
+            input.value = "";
+            render();
+        }
+
+        function removerObjetivo(i) {
+            objetivos.splice(i, 1);
+            render();
+        }
+
+        function render() {
+            const lista = document.getElementById("lista-objetivos");
+            lista.innerHTML = "";
+
+            objetivos.forEach((obj, i) => {
+                lista.innerHTML += `
+                    <div class="objetivo-item">
+                        <span>${obj}</span>
+                        <button type="button" class="btn-remover" onclick="removerObjetivo(${i})">x</button>
+                    </div>
+                `;
+            });
+
+            document.getElementById("input-objetivos").value = JSON.stringify(objetivos);
+
+            let concluidos = [];
+
+        function toggle(i, el) {
+            const txt = document.getElementById(`obj-${i}`);
+
+            if (el.checked) {
+                txt.style.textDecoration = "line-through";
+                txt.style.opacity = "0.6";
+                if (!concluidos.includes(i)) concluidos.push(i);
+            } else {
+                txt.style.textDecoration = "none";
+                txt.style.opacity = "1";
+                concluidos = concluidos.filter(x => x !== i);
+             }
+        }   
+
+        document.getElementById("btn-finalizar").onclick = function() {
+            const params = new URLSearchParams();
+
+            params.append("objetivos", JSON.stringify(objetivos));
+            params.append("concluidos", JSON.stringify(concluidos));
+
+            // cálculo de ciclos
+            const ciclos = Math.floor((tempoFoco - segundosRestantes) / tempoFoco);
+            params.append("ciclos", ciclos);
+
+            window.location.href = "/relatorio?" + params.toString();
+        };
+
+        }
+    </script>
+
 </body>
 </html>

@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <title>FocusFluir</title>
     <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+
     <style>
         body {
             background-color: #E4C5EB;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             margin: 0;
             font-family: 'Jersey 10', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
         }
 
@@ -22,17 +23,64 @@
             color: #FFFBFB;
             text-shadow: 4px 4px 0px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .main-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 60px;
+            width: 90%;
+            max-width: 1100px;
         }
 
         #timer {
             font-size: 180px;
             color: #61A5FF; 
             text-shadow: 5px 5px 0px rgba(0,0,0,0.1);
-            margin-bottom: 50px;
             letter-spacing: 5px;
         }
 
+        .objetivos-box {
+            width: 380px;
+            height: 260px;
+            background-color: #C379B4;
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .objetivos-titulo {
+            background-color: #D88AC3;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 26px;
+        }
+
+        #lista-objetivos {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .objetivo-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 18px;
+        }
+
+        .player-box {
+            margin-top: 30px;
+        }
+
         .btn-terminar {
+            margin-top: 30px;
             background-color: #B23B3B;
             color: white;
             border: none;
@@ -42,21 +90,48 @@
             font-family: 'Jersey 10', sans-serif;
             text-decoration: none;
             box-shadow: 0 4px 0 #802a2a;
+            cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            #timer {
+                font-size: 120px;
+            }
+
+            .objetivos-box {
+                width: 90%;
+                height: 220px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="status-msg" id="status-display">Você Consegue!!</div>
-    
-    <div id="timer">00:00</div>
 
-    <!-- PLAYER -->
-    <div style="width:300px; margin-bottom:20px;">
-        <div id="player"></div>
+    <div class="main-container">
+        <div id="timer">00:00</div>
+
+        <div class="objetivos-box">
+            <div class="objetivos-titulo">Objetivos:</div>
+            <div id="lista-objetivos"></div>
+        </div>
     </div>
 
-    <a href="{{ url_for('index') }}" class="btn-terminar">Terminar Seção</a>
+    <div class="player-box">
+        <div style="width:300px;">
+            <div id="player"></div>
+        </div>
+    </div>
+
+    <!-- 🔥 BOTÃO CORRIGIDO -->
+    <button id="btn-finalizar" class="btn-terminar">Terminar Sessão</button>
 
     <script>
         let tempoFoco = {{ min_foco }} * 60;
@@ -90,8 +165,57 @@
         atualizarDisplay();
         setInterval(cronometro, 1000);
 
-        
+        // 🎯 OBJETIVOS
+        const objetivos = JSON.parse('{{ objetivos | safe }}');
+        let concluidos = [];
 
+        function renderObjetivos() {
+            const container = document.getElementById("lista-objetivos");
+            container.innerHTML = "";
+
+            objetivos.forEach((obj, i) => {
+                container.innerHTML += `
+                    <div class="objetivo-item">
+                        <input type="checkbox" onchange="toggle(${i}, this)">
+                        <span id="obj-${i}">${obj}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function toggle(i, el) {
+            const txt = document.getElementById(`obj-${i}`);
+
+            if (el.checked) {
+                txt.style.textDecoration = "line-through";
+                txt.style.opacity = "0.6";
+                if (!concluidos.includes(i)) concluidos.push(i);
+            } else {
+                txt.style.textDecoration = "none";
+                txt.style.opacity = "1";
+                concluidos = concluidos.filter(x => x !== i);
+            }
+        }
+
+        renderObjetivos();
+
+        // 🔥 BOTÃO FINALIZAR FUNCIONANDO
+        document.getElementById("btn-finalizar").addEventListener("click", function() {
+            const params = new URLSearchParams();
+
+            params.append("objetivos", JSON.stringify(objetivos));
+            params.append("concluidos", JSON.stringify(concluidos));
+
+            const tempoTotal = {{ min_foco }} * 60;
+            const tempoUsado = tempoTotal - segundosRestantes;
+            const ciclos = Math.floor(tempoUsado / tempoTotal);
+
+            params.append("ciclos", ciclos);
+
+            window.location.href = "/relatorio?" + params.toString();
+        });
+
+        // 🎵 PLAYER (INALTERADO)
         const musicas = {{ musicas | tojson }};
 
         function extrairVideoId(url) {

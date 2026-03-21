@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Relatório</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+
+<style>
+body {
+    background-color: #E4C5EB;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Jersey 10', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.titulo {
+    font-size: 80px;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.topo {
+    display: flex;
+    gap: 100px;
+    margin-bottom: 40px;
+}
+
+.info {
+    text-align: center;
+    color: white;
+}
+
+.numero {
+    font-size: 80px;
+    color: #61A5FF;
+}
+
+.objetivos-box {
+    width: 350px;
+    height: 250px;
+    background: #C379B4;
+    border-radius: 15px;
+    padding: 15px;
+    color: white;
+}
+
+.objetivos-titulo {
+    background: #D88AC3;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.objetivo {
+    margin-bottom: 5px;
+}
+
+.concluir {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    font-size: 30px;
+    color: white;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="titulo">Relatório de Seção</div>
+
+<div class="topo">
+    <div class="info">
+        <div>Conclusão de Objetivos:</div>
+        <div class="numero" id="percentual">0%</div>
+    </div>
+
+    <div class="info">
+        <div>Ciclos Completos</div>
+        <div class="numero">{{ ciclos }}</div>
+    </div>
+</div>
+
+<div class="objetivos-box">
+    <div class="objetivos-titulo">Objetivos:</div>
+    <div id="lista"></div>
+</div>
+
+<a href="{{ url_for('index') }}" class="concluir">Concluir</a>
+
+<script>
+const objetivos = JSON.parse('{{ objetivos | safe }}');
+const concluidos = JSON.parse('{{ concluidos | safe }}');
+
+const lista = document.getElementById("lista");
+
+objetivos.forEach((obj, i) => {
+    const concluido = concluidos.includes(i);
+
+    lista.innerHTML += `
+        <div class="objetivo" style="
+            text-decoration:${concluido ? 'line-through' : 'none'};
+            opacity:${concluido ? '0.6' : '1'};
+        ">
+            ${obj}
+        </div>
+    `;
+});
+
+// cálculo %
+let porcentagem = 0;
+if (objetivos.length > 0) {
+    porcentagem = Math.round((concluidos.length / objetivos.length) * 100);
+}
+
+document.getElementById("percentual").innerText = porcentagem + "%";
+</script>
+
+</body>
+</html>

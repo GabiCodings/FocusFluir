@@ -88,7 +88,6 @@ def buscar_musicas_da_playlist(playlist_id: int):
     
     rows = cursor.fetchall()
 
-    
     musicas = [
         {"titulo": row["titulo"], "url": row["url"]}
         for row in rows
@@ -123,6 +122,9 @@ def estudo():
     min_pausa = request.args.get('min_pausa', 5)
     playlist_id = request.args.get('playlist_id')
 
+    # ✅ NOVO: receber objetivos
+    objetivos = request.args.get('objetivos', '[]')
+
     musicas = []
     if playlist_id:
         musicas = buscar_musicas_da_playlist(playlist_id)
@@ -131,7 +133,8 @@ def estudo():
         'estudo.html',
         min_foco=min_foco,
         min_pausa=min_pausa,
-        musicas=musicas
+        musicas=musicas,
+        objetivos=objetivos  # ✅ NOVO
     )
 
 @app.route('/playlists', methods=['GET', 'POST'])
@@ -183,6 +186,9 @@ def iniciar_foco():
     tempo_pausa_seg = tempo_pausa_min * 60
     
     playlist_selecionada_id = request.form.get('playlist_id') 
+
+    # ✅ NOVO: pegar objetivos
+    objetivos = request.form.get('objetivos', '[]')
     
     iniciar_nova_sessao(
         tempo_estudo=tempo_estudo_seg,
@@ -194,8 +200,22 @@ def iniciar_foco():
         'estudo',
         min_foco=tempo_estudo_min,
         min_pausa=tempo_pausa_min,
-        playlist_id=playlist_selecionada_id
+        playlist_id=playlist_selecionada_id,
+        objetivos=objetivos  # ✅ NOVO
     ))
+
+@app.route('/relatorio')
+def relatorio():
+    objetivos = request.args.get('objetivos', '[]')
+    concluidos = request.args.get('concluidos', '[]')
+    ciclos = request.args.get('ciclos', 0)
+
+    return render_template(
+        'relatorio.html',
+        objetivos=objetivos,
+        concluidos=concluidos,
+        ciclos=ciclos
+    )
 
 if __name__ == '__main__':
     setup_database()
