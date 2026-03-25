@@ -130,7 +130,6 @@
         </div>
     </div>
 
-    <!-- 🔥 BOTÃO CORRIGIDO -->
     <button id="btn-finalizar" class="btn-terminar">Terminar Sessão</button>
 
     <script>
@@ -139,6 +138,9 @@
         
         let segundosRestantes = tempoFoco;
         let modoFoco = true;
+
+        
+        let trocas = 0;
 
         const timerElement = document.getElementById('timer');
         const statusElement = document.getElementById('status-display');
@@ -155,6 +157,10 @@
                 atualizarDisplay();
             } else {
                 modoFoco = !modoFoco;
+
+                
+                trocas++;
+
                 segundosRestantes = modoFoco ? tempoFoco : tempoPausa;
                 
                 statusElement.textContent = modoFoco ? "Você Consegue!!" : "Hora de Relaxar!";
@@ -165,7 +171,6 @@
         atualizarDisplay();
         setInterval(cronometro, 1000);
 
-        // 🎯 OBJETIVOS
         const objetivos = JSON.parse('{{ objetivos | safe }}');
         let concluidos = [];
 
@@ -199,23 +204,20 @@
 
         renderObjetivos();
 
-        // 🔥 BOTÃO FINALIZAR FUNCIONANDO
         document.getElementById("btn-finalizar").addEventListener("click", function() {
             const params = new URLSearchParams();
 
             params.append("objetivos", JSON.stringify(objetivos));
             params.append("concluidos", JSON.stringify(concluidos));
 
-            const tempoTotal = {{ min_foco }} * 60;
-            const tempoUsado = tempoTotal - segundosRestantes;
-            const ciclos = Math.floor(tempoUsado / tempoTotal);
+            
+            const ciclos = Math.floor(trocas / 2);
 
             params.append("ciclos", ciclos);
 
             window.location.href = "/relatorio?" + params.toString();
         });
 
-        // 🎵 PLAYER (INALTERADO)
         const musicas = {{ musicas | tojson }};
 
         function extrairVideoId(url) {

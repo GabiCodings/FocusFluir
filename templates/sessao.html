@@ -64,7 +64,6 @@
             text-shadow: 2px 2px 0px rgba(0,0,0,0.2); 
         }
 
-        /* NOVO - apenas ajuste leve para lista */
         .objetivo-item {
             display: flex;
             justify-content: space-between;
@@ -93,7 +92,7 @@
     <form action="{{ url_for('iniciar_foco') }}" method="POST" class="container">
         <div class="row">
 
-            <!-- ESQUERDA -->
+            
             <div class="col-md-6">
 
                 <div class="input-block">
@@ -106,7 +105,6 @@
                     <input type="number" name="duracao_pausa" class="form-control" value="5" required>
                 </div>
 
-                <!-- OBJETIVOS -->
                 <div class="input-block">
                     <div class="card-rosa">Objetivos</div>
 
@@ -122,7 +120,6 @@
 
             </div>
 
-            <!-- DIREITA -->
             <div class="col-md-6">
                 <div class="playlist-bloco">
                     <h4 class="text-center">Qual Playlist Hoje?</h4>
@@ -200,7 +197,7 @@
             params.append("objetivos", JSON.stringify(objetivos));
             params.append("concluidos", JSON.stringify(concluidos));
 
-            // cálculo de ciclos
+            
             const ciclos = Math.floor((tempoFoco - segundosRestantes) / tempoFoco);
             params.append("ciclos", ciclos);
 

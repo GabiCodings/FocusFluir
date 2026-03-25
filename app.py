@@ -122,7 +122,7 @@ def estudo():
     min_pausa = request.args.get('min_pausa', 5)
     playlist_id = request.args.get('playlist_id')
 
-    # ✅ NOVO: receber objetivos
+    
     objetivos = request.args.get('objetivos', '[]')
 
     musicas = []
@@ -134,7 +134,7 @@ def estudo():
         min_foco=min_foco,
         min_pausa=min_pausa,
         musicas=musicas,
-        objetivos=objetivos  # ✅ NOVO
+        objetivos=objetivos  
     )
 
 @app.route('/playlists', methods=['GET', 'POST'])
@@ -187,7 +187,7 @@ def iniciar_foco():
     
     playlist_selecionada_id = request.form.get('playlist_id') 
 
-    # ✅ NOVO: pegar objetivos
+    
     objetivos = request.form.get('objetivos', '[]')
     
     iniciar_nova_sessao(
@@ -201,7 +201,7 @@ def iniciar_foco():
         min_foco=tempo_estudo_min,
         min_pausa=tempo_pausa_min,
         playlist_id=playlist_selecionada_id,
-        objetivos=objetivos  # ✅ NOVO
+        objetivos=objetivos 
     ))
 
 @app.route('/relatorio')
