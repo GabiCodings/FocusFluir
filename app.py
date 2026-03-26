@@ -47,8 +47,6 @@ def setup_database():
     conn.commit()
     conn.close()
 
-
-
 def criar_playlist(nome:str, imagem:str|None=None)->int:
     conn = conexao()
     cursor = conn.cursor()
@@ -76,7 +74,6 @@ def adicionar_musica(playlist_id:int, titulo:str, url:str):
     conn.commit()
     conn.close()
 
-
 def buscar_musicas_da_playlist(playlist_id: int):
     conn = conexao()
     cursor = conn.cursor()
@@ -98,6 +95,50 @@ def buscar_musicas_da_playlist(playlist_id: int):
 
 
 
+def deletar_playlist(playlist_id: int):
+    conn = conexao()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM musicas_playlist WHERE playlist_id = ?", (playlist_id,))
+    cursor.execute("DELETE FROM playlists WHERE id = ?", (playlist_id,))
+    conn.commit()
+    conn.close()
+
+def buscar_playlist_por_id(playlist_id: int):
+    conn = conexao()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, nome FROM playlists WHERE id = ?", (playlist_id,))
+    playlist = cursor.fetchone()
+
+    cursor.execute("SELECT url FROM musicas_playlist WHERE playlist_id = ?", (playlist_id,))
+    musicas = cursor.fetchall()
+
+    conn.close()
+
+    links = "\n".join([m["url"] for m in musicas])
+
+    return {
+        "id": playlist["id"],
+        "nome": playlist["nome"],
+        "links": links
+    }
+
+def atualizar_playlist(playlist_id: int, nome: str, links: list):
+    conn = conexao()
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE playlists SET nome = ? WHERE id = ?", (nome, playlist_id))
+    cursor.execute("DELETE FROM musicas_playlist WHERE playlist_id = ?", (playlist_id,))
+
+    for link in links:
+        cursor.execute(
+            "INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?, ?, ?)",
+            (playlist_id, link, link)
+        )
+
+    conn.commit()
+    conn.close()
+
 def iniciar_nova_sessao(tempo_estudo: int, tempo_pausa: int, playlist_id: int) -> int:
     conn = conexao()
     cursor = conn.cursor()
@@ -110,8 +151,6 @@ def iniciar_nova_sessao(tempo_estudo: int, tempo_pausa: int, playlist_id: int) -
     conn.close()
     return sessao_id
 
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -121,8 +160,6 @@ def estudo():
     min_foco = request.args.get('min_foco', 25)
     min_pausa = request.args.get('min_pausa', 5)
     playlist_id = request.args.get('playlist_id')
-
-    
     objetivos = request.args.get('objetivos', '[]')
 
     musicas = []
@@ -139,60 +176,52 @@ def estudo():
 
 @app.route('/playlists', methods=['GET', 'POST'])
 def playlists_page():
+    edit_playlist = None
+
     if request.method == 'POST':
         nome_playlist = request.form['nome_playlist']
-        imagem_url = request.form.get('imagem_url', '')
         links_musica_str = request.form['links_musica']
-
-        playlist_id = criar_playlist(nome_playlist, imagem_url)
+        edit_id = request.form.get('edit_id')
 
         links = [link.strip() for link in links_musica_str.split('\n') if link.strip()]
 
-        for link in links:
-            adicionar_musica(
-                playlist_id=playlist_id,
-                titulo=link,
-                url=link
-            )
+        if edit_id:
+            atualizar_playlist(int(edit_id), nome_playlist, links)
+        else:
+            playlist_id = criar_playlist(nome_playlist)
+            for link in links:
+                adicionar_musica(playlist_id, link, link)
 
         return redirect(url_for('playlists_page'))
 
+    edit_id = request.args.get('edit_id')
+    if edit_id:
+        edit_playlist = buscar_playlist_por_id(int(edit_id))
+
     playlists = listar_playlists()
-    return render_template('playlists.html', playlists=playlists)
+    return render_template('playlists.html', playlists=playlists, edit_playlist=edit_playlist)
+
+
+@app.route('/deletar_playlist/<int:id>')
+def deletar_playlist_route(id):
+    deletar_playlist(id)
+    return redirect(url_for('playlists_page'))
 
 @app.route('/sessao', methods=['GET'])
 def sessao():
     playlists = listar_playlists()
-    
-    return render_template('sessao.html', 
-        duracao_estudo="",
-        duracao_pausa="",
-        playlists=playlists,
-    )
+    return render_template('sessao.html', playlists=playlists)
 
 @app.route('/iniciar_foco', methods=['POST'])
 def iniciar_foco():
-    try:
-        tempo_estudo_min = int(request.form.get('duracao_estudo', 25))
-    except ValueError:
-        tempo_estudo_min = 25
-        
-    try:
-        tempo_pausa_min = int(request.form.get('duracao_pausa', 5))
-    except ValueError:
-        tempo_pausa_min = 5
-
-    tempo_estudo_seg = tempo_estudo_min * 60
-    tempo_pausa_seg = tempo_pausa_min * 60
-    
+    tempo_estudo_min = int(request.form.get('duracao_estudo', 25))
+    tempo_pausa_min = int(request.form.get('duracao_pausa', 5))
     playlist_selecionada_id = request.form.get('playlist_id') 
-
-    
     objetivos = request.form.get('objetivos', '[]')
-    
+
     iniciar_nova_sessao(
-        tempo_estudo=tempo_estudo_seg,
-        tempo_pausa=tempo_pausa_seg,
+        tempo_estudo=tempo_estudo_min * 60,
+        tempo_pausa=tempo_pausa_min * 60,
         playlist_id=playlist_selecionada_id,
     )
     
