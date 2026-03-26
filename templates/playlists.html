@@ -45,7 +45,19 @@
 
         .playlist-list { 
             margin-top: 30px; 
-            color: #FFFBFB; }
+            color: #FFFBFB; 
+        }
+
+        .icon-btn {
+            display: inline-block;
+            margin-left: 8px;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+        }
+
+.icon-btn:hover {
+    transform: scale(1.4);
+}
     </style>
 </head>
 <body>
@@ -83,8 +95,8 @@
         <li style="list-style-type: none; margin-bottom: 10px; color:#609af7;">
             {{ playlist.nome }} (ID: {{ playlist.id }})
 
-            <a href="{{ url_for('playlists_page', edit_id=playlist.id) }}" style="text-decoration: none;">✏️</a>
-            <a href="{{ url_for('deletar_playlist_route', id=playlist.id) }}" style="color:red; text-decoration: none;">❌</a>
+            <a href="{{ url_for('playlists_page', edit_id=playlist.id) }}" class="icon-btn" style="text-decoration: none;">✏️</a>
+            <a href="{{ url_for('deletar_playlist_route', id=playlist.id) }}" class="icon-btn" style="color:red; text-decoration: none;">❌</a>
         </li>
         {% endfor %}
     </div>
