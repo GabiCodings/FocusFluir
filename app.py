@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime
+from urllib.request import urlopen
+import json
 
 app = Flask(__name__)
 
@@ -10,6 +12,15 @@ def conexao():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
+
+def obter_titulo_youtube(url):
+    try:
+        oembed_url = f"https://www.youtube.com/oembed?url={url}&format=json"
+        with urlopen(oembed_url, timeout=5) as response:
+            data = json.loads(response.read().decode())
+            return data.get("title", url)
+    except:
+        return url
 
 def setup_database():
     conn = conexao()
@@ -67,9 +78,10 @@ def listar_playlists():
 def adicionar_musica(playlist_id:int, titulo:str, url:str):
     conn = conexao()
     cursor = conn.cursor()
+    titulo_real = obter_titulo_youtube(url)
     cursor.execute(
         "INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?,?,?)",
-        (playlist_id, titulo, url)
+        (playlist_id, titulo_real, url)
     )
     conn.commit()
     conn.close()
@@ -93,8 +105,6 @@ def buscar_musicas_da_playlist(playlist_id: int):
     conn.close()
     return musicas
 
-
-
 def deletar_playlist(playlist_id: int):
     conn = conexao()
     cursor = conn.cursor()
@@ -110,31 +120,64 @@ def buscar_playlist_por_id(playlist_id: int):
     cursor.execute("SELECT id, nome FROM playlists WHERE id = ?", (playlist_id,))
     playlist = cursor.fetchone()
 
-    cursor.execute("SELECT url FROM musicas_playlist WHERE playlist_id = ?", (playlist_id,))
+    cursor.execute("SELECT titulo, url FROM musicas_playlist WHERE playlist_id = ?", (playlist_id,))
     musicas = cursor.fetchall()
+
+    links_lista = []
+    titulos = []
+
+    for m in musicas:
+        url = m["url"]
+        titulo = m["titulo"]
+
+        if not titulo or titulo == url:
+            titulo = obter_titulo_youtube(url)
+
+            conn2 = conexao()
+            c2 = conn2.cursor()
+            c2.execute(
+                "UPDATE musicas_playlist SET titulo = ? WHERE url = ? AND playlist_id = ?",
+                (titulo, url, playlist_id)
+            )
+            conn2.commit()
+            conn2.close()
+
+        links_lista.append(url)
+        titulos.append(titulo)
 
     conn.close()
 
-    links = "\n".join([m["url"] for m in musicas])
+    links = "\n".join(links_lista)
 
     return {
         "id": playlist["id"],
         "nome": playlist["nome"],
-        "links": links
+        "links": links,
+        "titulos": titulos
     }
 
-def atualizar_playlist(playlist_id: int, nome: str, links: list):
+def atualizar_playlist(playlist_id: int, nome: str, links: list, remover_links: list):
     conn = conexao()
     cursor = conn.cursor()
 
     cursor.execute("UPDATE playlists SET nome = ? WHERE id = ?", (nome, playlist_id))
-    cursor.execute("DELETE FROM musicas_playlist WHERE playlist_id = ?", (playlist_id,))
+
+    cursor.execute("SELECT url FROM musicas_playlist WHERE playlist_id = ?", (playlist_id,))
+    musicas_atuais = [row["url"] for row in cursor.fetchall()]
+
+    for link in remover_links:
+        cursor.execute(
+            "DELETE FROM musicas_playlist WHERE playlist_id = ? AND url = ?",
+            (playlist_id, link)
+        )
 
     for link in links:
-        cursor.execute(
-            "INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?, ?, ?)",
-            (playlist_id, link, link)
-        )
+        if link not in musicas_atuais:
+            titulo_real = obter_titulo_youtube(link)
+            cursor.execute(
+                "INSERT INTO musicas_playlist (playlist_id, titulo, url) VALUES (?, ?, ?)",
+                (playlist_id, titulo_real, link)
+            )
 
     conn.commit()
     conn.close()
@@ -184,9 +227,10 @@ def playlists_page():
         edit_id = request.form.get('edit_id')
 
         links = [link.strip() for link in links_musica_str.split('\n') if link.strip()]
+        remover_links = request.form.getlist('remover_musica')
 
         if edit_id:
-            atualizar_playlist(int(edit_id), nome_playlist, links)
+            atualizar_playlist(int(edit_id), nome_playlist, links, remover_links)
         else:
             playlist_id = criar_playlist(nome_playlist)
             for link in links:
@@ -201,13 +245,12 @@ def playlists_page():
     playlists = listar_playlists()
     return render_template('playlists.html', playlists=playlists, edit_playlist=edit_playlist)
 
-
 @app.route('/deletar_playlist/<int:id>')
 def deletar_playlist_route(id):
     deletar_playlist(id)
     return redirect(url_for('playlists_page'))
 
-@app.route('/sessao', methods=['GET'])
+@app.route('/sessao')
 def sessao():
     playlists = listar_playlists()
     return render_template('sessao.html', playlists=playlists)

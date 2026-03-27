@@ -26,21 +26,25 @@
              text-align: center; 
         }
 
+        form {
+            width: 100%;
+            max-width: 400px;
+        }
+
         .custom-btn { 
             background-color: #a0c4ff; 
             border-color: #a0c4ff;
             color: #FFFBFB;
-            padding: 5px 30px; 
+            padding: 8px 20px; 
             border-radius: 10px; 
-            font-size: 1.25rem; 
-            width: 300px; 
-            margin: 10px 0; 
+            font-size: 1.1rem; 
+            width: 100%;
+            margin-top: 10px;
         }
 
         .form-group { 
             margin-bottom: 15px; 
             width: 100%; 
-            max-width: 400px; 
         }
 
         .playlist-list { 
@@ -55,9 +59,20 @@
             text-decoration: none;
         }
 
-.icon-btn:hover {
-    transform: scale(1.4);
-}
+        .icon-btn:hover {
+            transform: scale(1.4);
+        }
+
+        .remover-list {
+            max-height: 150px;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        .list-group-item {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
     </style>
 </head>
 <body>
@@ -79,14 +94,35 @@
             <textarea class="form-control" name="links_musica" rows="5" required>{{ edit_playlist.links if edit_playlist else '' }}</textarea>
         </div>
 
+        {% if edit_playlist and edit_playlist.links %}
+        <div class="form-group">
+            <label style="color: #1881fa;">Remover músicas:</label>
+
+            <div class="list-group remover-list">
+                {% for link in edit_playlist.links.split('\n') %}
+                {% set titulo = edit_playlist.titulos[loop.index0] %}
+                <label class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-truncate" style="max-width: 75%;">{{ titulo }}</span>
+                    <input 
+                        type="checkbox" 
+                        name="remover_musica" 
+                        value="{{ link }}"
+                        class="form-check-input"
+                    >
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <button type="submit" class="btn custom-btn">
             {{ 'Atualizar Playlist' if edit_playlist else 'Salvar Playlist' }}
         </button>
-    </form>
 
-    <a href="{{ url_for('index') }}" class="btn custom-btn" style="margin-top: 20px; background-color: #6c757d;">
-        Voltar
-    </a>
+        <a href="{{ url_for('index') }}" class="btn custom-btn" style="background-color: #6c757d;">
+            Voltar
+        </a>
+    </form>
 
     <div class="playlist-list">
         <h2 class="pixel-font" style="font-size: 30px;">Playlists Existentes:</h2>
@@ -95,8 +131,8 @@
         <li style="list-style-type: none; margin-bottom: 10px; color:#609af7;">
             {{ playlist.nome }} (ID: {{ playlist.id }})
 
-            <a href="{{ url_for('playlists_page', edit_id=playlist.id) }}" class="icon-btn" style="text-decoration: none;">✏️</a>
-            <a href="{{ url_for('deletar_playlist_route', id=playlist.id) }}" class="icon-btn" style="color:red; text-decoration: none;">❌</a>
+            <a href="{{ url_for('playlists_page', edit_id=playlist.id) }}" class="icon-btn">✏️</a>
+            <a href="{{ url_for('deletar_playlist_route', id=playlist.id) }}" class="icon-btn" style="color:red;">❌</a>
         </li>
         {% endfor %}
     </div>
