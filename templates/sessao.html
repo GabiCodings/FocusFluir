@@ -89,7 +89,8 @@
 <body>
     <h1 class="pixel-font">Vamos Lá!!</h1>
     
-    <form action="{{ url_for('iniciar_foco') }}" method="POST" class="container">
+    
+    <form id="form-foco" action="{{ url_for('iniciar_foco') }}" method="POST" class="container">
         <div class="row">
 
             
@@ -143,27 +144,27 @@
 
     <script>
         let objetivos = [];
-
+        
         function addObjetivo() {
             const input = document.getElementById("novo-objetivo");
             const texto = input.value.trim();
-
+        
             if (!texto) return;
-
+        
             objetivos.push(texto);
             input.value = "";
             render();
         }
-
+        
         function removerObjetivo(i) {
             objetivos.splice(i, 1);
             render();
         }
-
+        
         function render() {
             const lista = document.getElementById("lista-objetivos");
             lista.innerHTML = "";
-
+        
             objetivos.forEach((obj, i) => {
                 lista.innerHTML += `
                     <div class="objetivo-item">
@@ -172,40 +173,41 @@
                     </div>
                 `;
             });
-
+        
             document.getElementById("input-objetivos").value = JSON.stringify(objetivos);
-
-            let concluidos = [];
-
-        function toggle(i, el) {
-            const txt = document.getElementById(`obj-${i}`);
-
-            if (el.checked) {
-                txt.style.textDecoration = "line-through";
-                txt.style.opacity = "0.6";
-                if (!concluidos.includes(i)) concluidos.push(i);
-            } else {
-                txt.style.textDecoration = "none";
-                txt.style.opacity = "1";
-                concluidos = concluidos.filter(x => x !== i);
-             }
-        }   
-
-        document.getElementById("btn-finalizar").onclick = function() {
-            const params = new URLSearchParams();
-
-            params.append("objetivos", JSON.stringify(objetivos));
-            params.append("concluidos", JSON.stringify(concluidos));
-
-            
-            const ciclos = Math.floor((tempoFoco - segundosRestantes) / tempoFoco);
-            params.append("ciclos", ciclos);
-
-            window.location.href = "/relatorio?" + params.toString();
-        };
-
         }
-    </script>
+        
+        
+        document.getElementById("form-foco").addEventListener("submit", function(e) {
+            const tempo = document.querySelector("input[name='duracao_estudo']").value;
+            const pausa = document.querySelector("input[name='duracao_pausa']").value;
+            const playlist = document.querySelector("input[name='playlist_id']:checked");
+        
+            if (!tempo || tempo <= 0) {
+                alert("Defina um tempo de estudo válido.");
+                e.preventDefault();
+                return;
+            }
+        
+            if (!pausa || pausa <= 0) {
+                alert("Defina um tempo de pausa válido.");
+                e.preventDefault();
+                return;
+            }
+        
+            if (objetivos.length === 0) {
+                alert("Adicione pelo menos um objetivo.");
+                e.preventDefault();
+                return;
+            }
+        
+            if (!playlist) {
+                alert("Selecione uma playlist.");
+                e.preventDefault();
+                return;
+            }
+        });
+        </script>
 
 </body>
 </html>

@@ -257,10 +257,26 @@ def sessao():
 
 @app.route('/iniciar_foco', methods=['POST'])
 def iniciar_foco():
-    tempo_estudo_min = int(request.form.get('duracao_estudo', 25))
-    tempo_pausa_min = int(request.form.get('duracao_pausa', 5))
+    tempo_estudo_min = int(request.form.get('duracao_estudo', 0))
+    tempo_pausa_min = int(request.form.get('duracao_pausa', 0))
     playlist_selecionada_id = request.form.get('playlist_id') 
     objetivos = request.form.get('objetivos', '[]')
+
+    if tempo_estudo_min <= 0:
+        return "Tempo de estudo inválido", 400
+
+    if tempo_pausa_min <= 0:
+        return "Tempo de pausa inválido", 400
+
+    if not playlist_selecionada_id:
+        return "Playlist obrigatória", 400
+
+    try:
+        lista_objetivos = json.loads(objetivos)
+        if not lista_objetivos:
+            return "Adicione pelo menos um objetivo", 400
+    except:
+        return "Erro nos objetivos", 400
 
     iniciar_nova_sessao(
         tempo_estudo=tempo_estudo_min * 60,
