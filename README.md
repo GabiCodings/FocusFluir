@@ -21,6 +21,47 @@ Antes de começar, você precisa ter instalado:
 
 ---
 
+## 🧪 Ambiente Virtual (Opcional, mas recomendado)
+
+Para uma melhor organização do projeto, recomenda-se usar um ambiente virtual (**venv**).
+
+### ▶️ Criando o venv via terminal:
+
+```bash
+python -m venv venv
+```
+
+### ▶️ Ativando o venv:
+
+* **Windows:**
+
+```bash
+venv\Scripts\activate
+```
+
+* **Mac/Linux:**
+
+```bash
+source venv/bin/activate
+```
+
+### ▶️ Instalando dependências dentro do venv:
+
+```bash
+pip install flask
+```
+
+---
+
+### 💻 Criando venv pelo VS Code
+
+Você também pode criar e gerenciar o ambiente virtual pelo VS Code:
+
+Tutorial:
+https://code.visualstudio.com/docs/python/environments
+
+---
+
 ## ▶️ Executando o projeto
 
 1. Clone o repositório:
