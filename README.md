@@ -1,4 +1,4 @@
-# 🚀 Como rodar o projeto FocusFluir
+# 🚀 Seja Bem-vindo (a) ao FocusFluir
 
 Siga os passos abaixo para executar o projeto localmente:
 
