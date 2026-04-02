@@ -268,9 +268,6 @@ def iniciar_foco():
     if tempo_pausa_min <= 0:
         return "Tempo de pausa inválido", 400
 
-    if not playlist_selecionada_id:
-        return "Playlist obrigatória", 400
-
     try:
         lista_objetivos = json.loads(objetivos)
         if not lista_objetivos:

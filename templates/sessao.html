@@ -127,7 +127,7 @@
                     <div class="list-group">
                         {% for p in playlists %}
                         <label class="list-group-item">
-                            <input type="radio" name="playlist_id" value="{{ p.id }}" required> {{ p.nome }}
+                            <input type="radio" name="playlist_id" value="{{ p.id }}" > {{ p.nome }}
                         </label>
                         {% endfor %}
                     </div>
@@ -201,11 +201,8 @@
                 return;
             }
         
-            if (!playlist) {
-                alert("Selecione uma playlist.");
-                e.preventDefault();
-                return;
-            }
+            
+            
         });
         </script>
 
