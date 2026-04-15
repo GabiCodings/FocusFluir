@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime
 from urllib.request import urlopen
+import db.db as db
+import service.service as service
 import json
 
 app = Flask(__name__)
@@ -67,13 +69,6 @@ def criar_playlist(nome:str, imagem:str|None=None)->int:
     conn.close()
     return playlist_id
 
-def listar_playlists():
-    conn = conexao()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, nome FROM playlists")
-    playlist = cursor.fetchall()
-    conn.close()
-    return playlist
 
 def adicionar_musica(playlist_id:int, titulo:str, url:str):
     conn = conexao()
@@ -86,32 +81,6 @@ def adicionar_musica(playlist_id:int, titulo:str, url:str):
     conn.commit()
     conn.close()
 
-def buscar_musicas_da_playlist(playlist_id: int):
-    conn = conexao()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT titulo, url 
-        FROM musicas_playlist 
-        WHERE playlist_id = ?
-    """, (playlist_id,))
-    
-    rows = cursor.fetchall()
-
-    musicas = [
-        {"titulo": row["titulo"], "url": row["url"]}
-        for row in rows
-    ]
-
-    conn.close()
-    return musicas
-
-def deletar_playlist(playlist_id: int):
-    conn = conexao()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM musicas_playlist WHERE playlist_id = ?", (playlist_id,))
-    cursor.execute("DELETE FROM playlists WHERE id = ?", (playlist_id,))
-    conn.commit()
-    conn.close()
 
 def buscar_playlist_por_id(playlist_id: int):
     conn = conexao()
@@ -205,15 +174,14 @@ def estudo():
     playlist_id = request.args.get('playlist_id')
     objetivos = request.args.get('objetivos', '[]')
 
-    musicas = []
-    if playlist_id:
-        musicas = buscar_musicas_da_playlist(playlist_id)
+    
+    musicas = service.buscar_musicas_playlist(playlist_id)
 
     return render_template(
         'estudo.html',
         min_foco=min_foco,
         min_pausa=min_pausa,
-        musicas=musicas,
+        musicas=musicas["musicas"],
         objetivos=objetivos  
     )
 
@@ -242,17 +210,17 @@ def playlists_page():
     if edit_id:
         edit_playlist = buscar_playlist_por_id(int(edit_id))
 
-    playlists = listar_playlists()
+    playlists = db.listar_playlists()
     return render_template('playlists.html', playlists=playlists, edit_playlist=edit_playlist)
 
 @app.route('/deletar_playlist/<int:id>')
-def deletar_playlist_route(id):
-    deletar_playlist(id)
+def deletar_playlist_route(playlist_id):
+    service.deletar_playlist_service(playlist_id)
     return redirect(url_for('playlists_page'))
 
 @app.route('/sessao')
 def sessao():
-    playlists = listar_playlists()
+    playlists = db.listar_playlists()
     return render_template('sessao.html', playlists=playlists)
 
 @app.route('/iniciar_foco', methods=['POST'])
