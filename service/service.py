@@ -10,8 +10,7 @@ def buscar_musicas_playlist (playlist_id):
     }
 
 def deletar_playlist_service(playlist_id):
-    if (playlist_id):
-        return db.deletar_playlist
-    else:
-        return ValueError
+    if not isinstance(playlist_id, int) or playlist_id <= 0:
+        raise ValueError("ID Inválido")
+    db.deletar_playlist(playlist_id, playlist_id)
 
