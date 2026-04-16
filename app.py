@@ -213,7 +213,7 @@ def playlists_page():
     playlists = db.listar_playlists()
     return render_template('playlists.html', playlists=playlists, edit_playlist=edit_playlist)
 
-@app.route('/deletar_playlist/<int:id>')
+@app.route('/deletar_playlist/<int:playlist_id>')
 def deletar_playlist_route(playlist_id):
     service.deletar_playlist_service(playlist_id)
     return redirect(url_for('playlists_page'))
