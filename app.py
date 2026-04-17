@@ -210,7 +210,8 @@ def playlists_page():
     if edit_id:
         edit_playlist = buscar_playlist_por_id(int(edit_id))
 
-    playlists = db.listar_playlists()
+    resultado = service.listar_playlists_service()
+    playlists = resultado["playlists"]
     return render_template('playlists.html', playlists=playlists, edit_playlist=edit_playlist)
 
 @app.route('/deletar_playlist/<int:playlist_id>')
