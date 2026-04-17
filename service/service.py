@@ -14,3 +14,14 @@ def deletar_playlist_service(playlist_id):
         raise ValueError("ID Inválido")
     db.deletar_playlist(playlist_id, playlist_id)
 
+def listar_playlists_service():
+    playlists = db.listar_playlists()
+
+    if playlists is None:
+        raise ValueError("Erro ao buscar playlists")
+
+    return {
+        "playlists": playlists,
+        "status": bool(playlists)
+    }
+
