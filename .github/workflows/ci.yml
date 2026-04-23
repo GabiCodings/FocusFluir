@@ -1,0 +1,37 @@
+# CI: testes unitários (pytest) + E2E (pytest + Playwright) com a app Flask a correr.
+name: CI
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          # Sem requirements.txt / pyproject.toml, não use cache: pip (a action falha ao achar o arquivo de lock do cache).
+
+      # Sem requirements.txt: mesma ideia de quem instala com "pip install flask" na máquina.
+      - name: Instalar dependências
+        run: pip install flask pytest playwright pytest-playwright
+
+      - name: Testes unitários
+        run: python -m pytest tests/ -v
+
+      - name: Instalar Chromium (Playwright)
+        run: python -m playwright install --with-deps chromium
+
+      - name: Preparar BD, subir Flask e E2E
+        run: |
+          set -e
+          rm -f focusfluir.db
+          python -c "from app import setup_database; setup_database()"
+          python -c "from app import app; app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)" &
+          sleep 3
+          python -m pytest e2e/ -v
