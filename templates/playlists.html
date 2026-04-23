@@ -132,7 +132,7 @@
             {{ playlist.nome }} (ID: {{ playlist.id }})
 
             <a href="{{ url_for('playlists_page', edit_id=playlist.id) }}" class="icon-btn">✏️</a>
-            <a href="{{ url_for('deletar_playlist_route', playlist_id=playlist.id) }}" class="icon-btn" style="color:red;">❌</a>
+            <a href="{{ url_for('deletar_playlist_route', playlist_id=playlist.id) }}" class="icon-btn" style="color:red;" name="deletar">❌</a>
         </li>
         {% endfor %}
     </div>

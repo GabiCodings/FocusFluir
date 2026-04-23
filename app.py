@@ -6,6 +6,8 @@ import db.db as db
 import service.service as service
 import json
 
+
+
 app = Flask(__name__)
 
 DATABASE = "focusfluir.db"
