@@ -98,12 +98,14 @@
 
                 <div class="input-block">
                     <div class="card-rosa">Tempo (Minutos)</div>
-                    <input type="number" name="duracao_estudo" class="form-control" value="25" required>
+                    <input type="number" name="duracao_estudo" class="form-control" value="25" required max="100">
+                    <small style="color:#fff;">Máximo de 100 minutos</small>
                 </div>
 
                 <div class="input-block">
                     <div class="card-rosa">Pausas (Minutos)</div>
-                    <input type="number" name="duracao_pausa" class="form-control" value="5" required>
+                    <input type="number" name="duracao_pausa" class="form-control" value="5" required max="100">
+                    <small style="color:#fff;">Máximo de 100 minutos</small>
                 </div>
 
                 <div class="input-block">
@@ -112,9 +114,12 @@
                     <div id="lista-objetivos"></div>
 
                     <div class="d-flex mt-2">
-                        <input type="text" id="novo-objetivo" class="form-control" placeholder="Digite um objetivo">
+                        <input type="text" id="novo-objetivo" class="form-control"
+                               placeholder="Digite um objetivo"
+                               maxlength="300">
                         <button type="button" class="btn btn-light ms-2" onclick="addObjetivo()">+</button>
                     </div>
+                    <small style="color:#fff;">Máximo de 300 caracteres</small>
 
                     <input type="hidden" name="objetivos" id="input-objetivos">
                 </div>
@@ -150,6 +155,11 @@
             const texto = input.value.trim();
         
             if (!texto) return;
+    
+            if (texto.length > 300) {
+                alert("O objetivo pode ter no máximo 300 caracteres.");
+                return;
+            }
         
             objetivos.push(texto);
             input.value = "";
@@ -181,8 +191,27 @@
         document.getElementById("form-foco").addEventListener("submit", function(e) {
             const tempo = document.querySelector("input[name='duracao_estudo']").value;
             const pausa = document.querySelector("input[name='duracao_pausa']").value;
-            const playlist = document.querySelector("input[name='playlist_id']:checked");
-        
+    
+            if (tempo > 100) {
+                alert("O tempo de estudo deve ser no máximo 100 minutos.");
+                e.preventDefault();
+                return;
+            }
+    
+            if (pausa > 100) {
+                alert("O tempo de pausa deve ser no máximo 100 minutos.");
+                e.preventDefault();
+                return;
+            }
+    
+            for (let obj of objetivos) {
+                if (obj.length > 300) {
+                    alert("Cada objetivo deve ter no máximo 300 caracteres.");
+                    e.preventDefault();
+                    return;
+                }
+            }
+    
             if (!tempo || tempo <= 0) {
                 alert("Defina um tempo de estudo válido.");
                 e.preventDefault();
@@ -200,11 +229,8 @@
                 e.preventDefault();
                 return;
             }
-        
-            
-            
         });
-        </script>
+    </script>
 
 </body>
 </html>

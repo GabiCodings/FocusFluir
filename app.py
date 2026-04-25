@@ -216,6 +216,7 @@ def playlists_page():
     playlists = resultado["playlists"]
     return render_template('playlists.html', playlists=playlists, edit_playlist=edit_playlist)
 
+
 @app.route('/deletar_playlist/<int:playlist_id>')
 def deletar_playlist_route(playlist_id):
     service.deletar_playlist_service(playlist_id)
