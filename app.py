@@ -199,6 +199,8 @@ def playlists_page():
         links = [link.strip() for link in links_musica_str.split('\n') if link.strip()]
         remover_links = request.form.getlist('remover_musica')
 
+        
+
         if edit_id:
             atualizar_playlist(int(edit_id), nome_playlist, links, remover_links)
         else:

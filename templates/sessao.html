@@ -119,7 +119,7 @@
                                maxlength="300">
                         <button type="button" class="btn btn-light ms-2" onclick="addObjetivo()">+</button>
                     </div>
-                    <small style="color:#fff;">Máximo de 300 caracteres</small>
+                    
 
                     <input type="hidden" name="objetivos" id="input-objetivos">
                 </div>
@@ -155,11 +155,6 @@
             const texto = input.value.trim();
         
             if (!texto) return;
-    
-            if (texto.length > 300) {
-                alert("O objetivo pode ter no máximo 300 caracteres.");
-                return;
-            }
         
             objetivos.push(texto);
             input.value = "";
@@ -204,13 +199,7 @@
                 return;
             }
     
-            for (let obj of objetivos) {
-                if (obj.length > 300) {
-                    alert("Cada objetivo deve ter no máximo 300 caracteres.");
-                    e.preventDefault();
-                    return;
-                }
-            }
+            
     
             if (!tempo || tempo <= 0) {
                 alert("Defina um tempo de estudo válido.");
